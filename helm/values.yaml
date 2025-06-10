@@ -18,5 +18,5 @@ ingress:
   host: helm.mydomain.com
   root:
       backend: 
-      port: 443
+      port: 80
       path: /
