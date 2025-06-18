@@ -6,4 +6,4 @@ data:
   ENVIRONMENT: dev
   PLATFORM: kubernetes
   LOG_LEVEL: debug
-  PORT: 80
+  PORT: "80"
