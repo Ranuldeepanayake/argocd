@@ -9,14 +9,14 @@ containers:
     configMapRef: app-1-config
 
   - name: app-2
-    image: nginxdemos/hello:latest
+    image: jenkins/jenkins:lts
     imagePullPolicy: IfNotPresent
     ports:
       containerPort: 8080
     configMapRef: app-2-config
 
 service:
-  name: helm-service
+  name: helm-service-1
   type: ClusterIP
   ports:
     - name: app-1
@@ -37,10 +37,10 @@ ingress:
         - path: /(/|$)(.*)
           pathType: ImplementationSpecific
           service:
-            name: helm-service
+            name: helm-service-1
             port: 80
         - path: /auth(/|$)(.*)
           pathType: ImplementationSpecific
           service:
-            name: helm-service
+            name: helm-service-1
             port: 8080
