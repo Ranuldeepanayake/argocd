@@ -31,15 +31,15 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
   hosts:
-    - host: hello.mydomain.com
+    - host: helm.mydomain.com
       paths:
         - path: /(/|$)(.*)
           pathType: ImplementationSpecific
           service:
-            name: app-1-service
+            name: {{ .Release.Name }}
             port: 80
         - path: /auth(/|$)(.*)
           pathType: ImplementationSpecific
           service:
-            name: app-2-service
+            name: {{ .Release.Name }}
             port: 8080
