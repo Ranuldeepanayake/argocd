@@ -16,6 +16,7 @@ containers:
     configMapRef: app-2-config
 
 service:
+  name: helm-service
   type: ClusterIP
   ports:
     - name: app-1
@@ -36,10 +37,10 @@ ingress:
         - path: /(/|$)(.*)
           pathType: ImplementationSpecific
           service:
-            name: {{ .Release.Name }}
+            name: helm-service
             port: 80
         - path: /auth(/|$)(.*)
           pathType: ImplementationSpecific
           service:
-            name: {{ .Release.Name }}
+            name: helm-service
             port: 8080
