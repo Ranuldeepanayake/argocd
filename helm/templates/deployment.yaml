@@ -13,8 +13,24 @@ spec:
         app: {{ .Release.Name }}
     spec:
       containers:
-        - name: {{ .Release.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+      {{- range .Values.containers }}
+        - name: {{ .name }}
+          image: {{ .image }}
+          imagePullPolicy: {{ .imagePullPolicy }}
           ports:
-            - containerPort: {{ .Values.image.ports.containerPort }}
+          {{- range .ports }}
+            - containerPort: {{ . }}
+          {{- end }}
+      {{- if .env }}
+          env:
+          {{- range .env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+          {{- end }}
+      {{- end }}
+        {{- if .configMapRef }}
+          envFrom:
+            - configMapRef:
+                name: {{ .configMapRef }}
+        {{- end }}
+      {{- end }}

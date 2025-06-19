@@ -1,22 +1,45 @@
 replicaCount: 1
 
-image:
-  repository: nginxdemos/hello
-  tag: latest
-  pullPolicy: IfNotPresent
-  ports:
-    containerPort: 80
+containers:
+  - name: app-1
+    image: nginxdemos/hello:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+      containerPort: 80
+    configMapRef: app-1-config
+
+  - name: app-2
+    image: nginxdemos/hello:latest
+    imagePullPolicy: IfNotPresent
+    ports:
+      containerPort: 8080
+    configMapRef: app-2-config
 
 service:
   type: ClusterIP
-  port: 80
-  targetProtocol: http
-  protocol: TCP
-  name: http
+  ports:
+    - name: app-1
+      port: 80
+      targetPort: 80
+    - name: app-2
+      port: 8080
+      targetPort: 8080
 
 ingress:
-  host: helm.mydomain.com
-  root:
-      backend: 
-      port: 80
-      path: /
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  hosts:
+    - host: hello.mydomain.com
+      paths:
+        - path: /(/|$)(.*)
+          pathType: ImplementationSpecific
+          service:
+            name: app-1-service
+            port: 80
+        - path: /auth(/|$)(.*)
+          pathType: ImplementationSpecific
+          service:
+            name: app-2-service
+            port: 8080
