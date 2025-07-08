@@ -21,13 +21,13 @@ spec:
           {{- range .ports }}
             - containerPort: {{ . }}
           {{- end }}
-      {{- if .env }}
+        {{- if .env }}
           env:
           {{- range .env }}
             - name: {{ .name }}
               value: {{ .value | quote }}
           {{- end }}
-      {{- end }}
+        {{- end }}
         {{- if .configMapRef }}
           envFrom:
             - configMapRef:

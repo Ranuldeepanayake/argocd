@@ -1,0 +1,4 @@
+configMapGenerator:
+  - name: app-1-config
+    envs:
+      - app-1.env
