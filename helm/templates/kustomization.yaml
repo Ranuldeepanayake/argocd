@@ -1,7 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-configMapGenerator:
-  - name: app-1-config
-    envs:
-      - ../files/app-1.env
