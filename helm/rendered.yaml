@@ -1,0 +1,115 @@
+---
+# Source: helm/templates/config-map.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-2-config
+data:
+  HOSTNAME: app-2
+  ENVIRONMENT: dev
+  PLATFORM: kubernetes
+  LOG_LEVEL: debug
+  PORT: "8080"
+---
+# Source: helm/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: helm-service-1
+  labels:
+    app: release-name
+spec:
+  type: ClusterIP
+  selector:
+    app: release-name
+  ports:
+    - name: app-1
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: app-2
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+---
+# Source: helm/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: release-name
+  template:
+    metadata:
+      labels:
+        app: release-name
+    spec:
+      containers:
+        - name: app-1
+          image: nginxdemos/hello:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: app-1-config
+        - name: app-2
+          image: jenkins/jenkins:lts
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: app-2-config
+---
+# Source: helm/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: helm.mydomain.com
+      http:
+        paths:
+          - path: /(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: helm-service-1
+                port:
+                  number: 80
+          - path: /auth(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: helm-service-1
+                port:
+                  number: 8080
+---
+# Source: helm/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "release-name-helm-test-connection"
+  labels:
+    helm.sh/chart: helm-1.6.0
+    app.kubernetes.io/name: helm
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['release-name-helm:']
+  restartPolicy: Never
